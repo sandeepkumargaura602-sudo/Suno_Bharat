@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suno Bharat | Civic Action</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="navbar">
+  <div class="logo">Suno<span>Bharat</span></div>
+  <nav>
+    <a href="#home">Home</a><a href="#report">Report</a><a href="#issues">Issues</a>
+    <a href="#how">How it works</a><a href="#dashboard">Dashboard</a>
+  </nav>
+  <a class="nav-btn" href="#report">Report Issue</a>
+</header>
+
+<main>
+<section id="home" class="hero">
+  <div>
+    <p class="eyebrow">REPORT • VERIFY • SUPPORT • AMPLIFY • RESOLVE</p>
+    <h1>From civic complaint to <span>collective action.</span></h1>
+    <p class="hero-text">Report a real civic problem, verify it, build community support, route it to the right authority and track the resolution.</p>
+    <div class="actions"><a class="primary-btn" href="#report">Report a Problem</a><a class="secondary-btn" href="#issues">View Issues ↓</a></div>
+  </div>
+  <div class="hero-panel">
+    <div class="mini-top"><span class="live-dot"></span> LIVE CIVIC ACTION</div>
+    <div class="big-stat">7</div><p>stages from report to resolution</p>
+    <div class="flow"><span>Report</span><i>→</i><span>Verify</span><i>→</i><span>Support</span><i>→</i><span>Resolve</span></div>
+  </div>
+</section>
+
+<section id="report" class="section report">
+  <div class="heading"><p class="eyebrow">01 / REPORT</p><h2>Make the problem visible.</h2><p>Photo + GPS + category + description.</p></div>
+  <form id="reportForm" class="report-card">
+    <label class="upload" for="photo">
+      <input id="photo" type="file" accept="image/*" required>
+      <div id="uploadPrompt"><div class="upload-icon">＋</div><h3>Add issue photo</h3><p>Choose a clear photo of the problem</p></div>
+      <img id="preview" alt="Issue preview">
+    </label>
+    <div class="loc-box">
+      <div><strong>📍 GPS Location</strong><p id="gpsText">Not captured yet</p></div>
+      <button id="gpsBtn" type="button" class="secondary-btn">Use My Location</button>
+    </div>
+    <div class="grid">
+      <label>Category<select id="category" required><option value="">Select category</option><option>Pothole / Road</option><option>Garbage</option><option>Drainage</option><option>Streetlight</option><option>Broken Infrastructure</option><option>Other</option></select></label>
+      <label>Location name<input id="location" placeholder="e.g. Near Main Gate" required></label>
+      <label class="full">Description<textarea id="description" rows="4" placeholder="What is wrong? How serious is it?" required></textarea></label>
+    </div>
+    <button class="primary-btn" type="submit">Submit Issue →</button>
+    <p id="message"></p>
+  </form>
+</section>
+
+<section id="issues" class="section issues">
+  <div class="heading row"><div><p class="eyebrow">02 / COMMUNITY FEED</p><h2>Support instead of duplicate complaints.</h2><p>Citizens can support an existing issue and increase its priority.</p></div><button id="clearBtn" class="secondary-btn">Clear Local Data</button></div>
+  <div id="issueGrid" class="issue-grid"></div>
+</section>
+
+<section id="how" class="section process">
+  <div class="heading center"><p class="eyebrow">03 / FULL LOOP</p><h2>Accountability at every stage.</h2></div>
+  <div class="steps">
+    <div><b>01</b><h3>Report</h3><p>Citizen submits photo, GPS, category and description.</p></div>
+    <div><b>02</b><h3>Verify</h3><p>Volunteer checks authenticity and duplicate reports.</p></div>
+    <div><b>03</b><h3>Support</h3><p>Nearby citizens support the same issue.</p></div>
+    <div><b>04</b><h3>Route</h3><p>Verified issue goes to the responsible authority.</p></div>
+    <div><b>05</b><h3>Track</h3><p>Status moves through assigned and in-progress.</p></div>
+    <div><b>06</b><h3>Amplify</h3><p>Stalled high-impact issues gain public visibility.</p></div>
+    <div><b>07</b><h3>Resolve</h3><p>Before/after proof and citizen feedback close the loop.</p></div>
+  </div>
+</section>
+
+<section id="dashboard" class="section dashboard">
+  <div class="heading center"><p class="eyebrow">04 / AUTHORITY VIEW</p><h2>Issue intelligence.</h2><p>Frontend preview of the future admin/authority dashboard.</p></div>
+  <div class="dash-grid">
+    <div><strong id="totalCount">0</strong><span>Total reports</span></div>
+    <div><strong id="verifiedCount">0</strong><span>Verified</span></div>
+    <div><strong id="supportCount">0</strong><span>Community supports</span></div>
+    <div><strong id="amplifyCount">0</strong><span>Amplified</span></div>
+  </div>
+  <div class="dashboard-note"><h3>Future integrations</h3><p>Authority directory • department routing • escalation contacts • resolution proof • citizen feedback • analytics.</p></div>
+</section>
+
+<section class="section about">
+  <p class="eyebrow">SUNO BHARAT</p><h2>Complaint → Visibility → Accountability → Action.</h2>
+  <p>Built around collective support, verification, escalation and proof of resolution — not just complaint registration.</p>
+</section>
+</main>
+<footer>© 2026 Suno Bharat • Civic Action Platform</footer>
+<script src="script.js"></script>
+</body>
+</html>
