@@ -367,6 +367,18 @@
               <p>
                 GPS:
                 ${issue.latitude ?? "N/A"}
+                ${issue.latitude != null && issue.longitude != null ? `
+  <a
+    href="https://www.google.com/maps?q=${issue.latitude},${issue.longitude}"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="secondary-btn"
+  >
+    📍 View Problem Location
+  </a>
+` : `
+  <span>📍 Location not available</span>
+`}
               </p>
 
               <p>
