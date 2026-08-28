@@ -777,25 +777,44 @@ $("logoutBtn").addEventListener("click", async () => {
 // ===============================
 
 async function checkVolunteerAccess(user) {
-  const volunteerBtn = $("volunteerBtn");
+
+  const volunteerBtn = document.getElementById("volunteerBtn");
 
   if (!volunteerBtn) return;
 
-  if (!user) {
-    volunteerBtn.style.display = "none";
-    return;
-  }
+  // Default: hide button
+  volunteerBtn.style.display = "none";
 
-  const { data, error } = await supabaseClient
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  // User login nahi hai
+  if (!user) return;
 
-  if (!error && data?.role === "volunteer") {
-    volunteerBtn.style.display = "inline-block";
-  } else {
-    volunteerBtn.style.display = "none";
+  try {
+
+    const { data, error } = await supabaseClient
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    console.log("Volunteer role check:", {
+      userId: user.id,
+      data: data,
+      error: error
+    });
+
+    if (error) {
+      console.error("Role check error:", error);
+      return;
+    }
+
+    if (data && data.role === "volunteer") {
+      volunteerBtn.style.display = "inline-block";
+    }
+
+  } catch (err) {
+
+    console.error("Volunteer access error:", err);
+
   }
 }
 
