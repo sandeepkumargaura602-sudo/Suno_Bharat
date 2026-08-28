@@ -772,7 +772,32 @@ $("logoutBtn").addEventListener("click", async () => {
     "Logged out successfully.";
 
 });
+// ===============================
+// VOLUNTEER ACCESS
+// ===============================
 
+async function checkVolunteerAccess(user) {
+  const volunteerBtn = $("volunteerBtn");
+
+  if (!volunteerBtn) return;
+
+  if (!user) {
+    volunteerBtn.style.display = "none";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!error && data?.role === "volunteer") {
+    volunteerBtn.style.display = "inline-block";
+  } else {
+    volunteerBtn.style.display = "none";
+  }
+}
 
 // ===============================
 // AUTH UI
@@ -792,6 +817,7 @@ async function updateAuthUI() {
 
     $("userEmail").textContent =
       user.email;
+    await checkVolunteerAccess(user);
 
   } else {
 
@@ -800,6 +826,12 @@ async function updateAuthUI() {
     $("logoutBtn").style.display = "none";
 
     $("userEmail").textContent = "";
+
+    const volunteerBtn = $("volunteerBtn");
+
+    if (volunteerBtn) {
+      volunteerBtn.style.display = "none";
+    }
 
   }
 
