@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Dashboard | Suno Bharat</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            background: #f6f8f5;
+        }
+
+        .volunteer-page {
+            max-width: 1200px;
+            margin: auto;
+            padding: 60px 7%;
+        }
+
+        .volunteer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .volunteer-header h1 {
+            font-size: 42px;
+            letter-spacing: -2px;
+        }
+
+        .volunteer-user {
+            color: #667168;
+            font-size: 14px;
+        }
+
+        .volunteer-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .volunteer-stat {
+            background: white;
+            border: 1px solid #dfe7df;
+            border-radius: 15px;
+            padding: 22px;
+        }
+
+        .volunteer-stat strong {
+            display: block;
+            font-size: 35px;
+        }
+
+        .volunteer-stat span {
+            color: #6d776f;
+            font-size: 13px;
+        }
+
+        .volunteer-list {
+            display: grid;
+            gap: 18px;
+        }
+
+        .volunteer-card {
+            background: white;
+            border: 1px solid #dfe7df;
+            border-radius: 18px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 22px;
+        }
+
+        .volunteer-card img {
+            width: 180px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #e8eee7;
+        }
+
+        .volunteer-card h3 {
+            margin: 5px 0 8px;
+            font-size: 21px;
+        }
+
+        .volunteer-card p {
+            color: #69736c;
+            font-size: 14px;
+            margin: 4px 0;
+        }
+
+        .volunteer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .volunteer-actions button,
+        .volunteer-actions select {
+            border: 1px solid #d4ddd4;
+            background: #f7faf6;
+            border-radius: 9px;
+            padding: 9px 12px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .verify-btn {
+            background: #173d2b !important;
+            color: white;
+            border-color: #173d2b !important;
+        }
+
+        .delete-btn {
+            background: #fff1f1 !important;
+            color: #a33a3a;
+        }
+
+        .verified {
+            display: inline-block;
+            background: #e8f3e9;
+            color: #397044;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .pending {
+            display: inline-block;
+            background: #f2f3ef;
+            color: #6d756e;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        #volunteerMessage {
+            margin-bottom: 20px;
+            font-weight: 750;
+        }
+
+        @media(max-width: 700px) {
+            .volunteer-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .volunteer-card {
+                grid-template-columns: 1fr;
+            }
+
+            .volunteer-card img {
+                width: 100%;
+                height: 220px;
+            }
+
+            .volunteer-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">Suno<span>Bharat</span></div>
+
+        <a class="secondary-btn" href="index.html">
+            ← Back to Website
+        </a>
+    </header>
+
+    <main class="volunteer-page">
+
+        <div class="volunteer-header">
+            <div>
+                <p class="eyebrow">VOLUNTEER PANEL</p>
+                <h1>Issue Management</h1>
+                <p class="volunteer-user" id="volunteerUser">
+                    Checking volunteer access...
+                </p>
+            </div>
+
+            <button id="logoutVolunteer" class="secondary-btn">
+                Logout
+            </button>
+        </div>
+
+        <p id="volunteerMessage"></p>
+
+        <div class="volunteer-stats">
+            <div class="volunteer-stat">
+                <strong id="vTotal">0</strong>
+                <span>Total Reports</span>
+            </div>
+
+            <div class="volunteer-stat">
+                <strong id="vVerified">0</strong>
+                <span>Verified</span>
+            </div>
+
+            <div class="volunteer-stat">
+                <strong id="vPending">0</strong>
+                <span>Pending</span>
+            </div>
+
+            <div class="volunteer-stat">
+                <strong id="vResolved">0</strong>
+                <span>Resolved</span>
+            </div>
+        </div>
+
+        <div id="volunteerList" class="volunteer-list">
+            Loading reports...
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        const SUPABASE_URL =
+            "https://ejoyyrtfpkavoyujsrkv.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_V4W--9Cb5MasMeCIie6TfQ_VFB9gUl2";
+
+        const supabaseClient = supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+        const $ = id => document.getElementById(id);
+
+        let currentUser = null;
+
+        async function checkVolunteer() {
+
+            const {
+                data: { session }
+            } = await supabaseClient.auth.getSession();
+
+            if (!session) {
+                window.location.href = "index.html";
+                return false;
+            }
+
+            currentUser = session.user;
+
+            const { data: roleData, error } =
+                await supabaseClient
+                    .from("user_roles")
+                    .select("role")
+                    .eq("user_id", currentUser.id)
+                    .single();
+
+            if (error || !roleData || roleData.role !== "volunteer") {
+
+                $("volunteerMessage").textContent =
+                    "Access denied. Volunteer account required.";
+
+                $("volunteerList").innerHTML = "";
+
+                return false;
+            }
+
+            $("volunteerUser").textContent =
+                "Logged in as Volunteer • " + currentUser.email;
+
+            return true;
+        }
+
+
+        async function loadIssues() {
+
+            const { data: issues, error } =
+                await supabaseClient
+                    .from("Issues")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+
+            if (error) {
+                console.error(error);
+
+                $("volunteerMessage").textContent =
+                    "Could not load issues: " + error.message;
+
+                return;
+            }
+
+            renderStats(issues || []);
+            renderIssues(issues || []);
+        }
+
+
+        function renderStats(issues) {
+
+            $("vTotal").textContent = issues.length;
+
+            $("vVerified").textContent =
+                issues.filter(i => i.verified === true).length;
+
+            $("vPending").textContent =
+                issues.filter(i => i.verified !== true).length;
+
+            $("vResolved").textContent =
+                issues.filter(i =>
+                    String(i.status || "").toLowerCase() === "resolved"
+                ).length;
+        }
+
+
+        function renderIssues(issues) {
+
+            if (!issues.length) {
+
+                $("volunteerList").innerHTML = `
+          <div class="volunteer-card">
+            <div>
+              <h3>No reports yet</h3>
+              <p>Citizen reports will appear here.</p>
+            </div>
+          </div>
+        `;
+
+                return;
+            }
+
+
+            $("volunteerList").innerHTML = issues.map(issue => {
+
+                const verified = issue.verified === true;
+
+                return `
+          <article class="volunteer-card">
+
+            <img
+              src="${issue.photo_url || ""}"
+              alt="Civic issue"
+            >
+
+            <div>
+
+              <span class="tag">
+                ${escapeHTML(issue.category || "Other")}
+              </span>
+
+              <h3>
+                ${escapeHTML(issue.description || "No description")}
+              </h3>
+
+              <p>
+                📍 ${escapeHTML(issue.location || "Location unavailable")}
+              </p>
+
+              <p>
+                GPS:
+                ${issue.latitude ?? "N/A"}
+              </p>
+
+              <p>
+                Supports:
+                ${issue.supporters || 0}
+              </p>
+
+              <p>
+                Status:
+                <strong>${escapeHTML(issue.status || "reported")}</strong>
+              </p>
+
+              <p>
+                Verification:
+                ${verified
+                        ? `<span class="verified">✓ VERIFIED</span>`
+                        : `<span class="pending">PENDING</span>`
+                    }
+              </p>
+
+              <div class="volunteer-actions">
+
+                ${verified
+                        ? ""
+                        : `
+                    <button
+                      class="verify-btn"
+                      onclick="verifyIssue(${issue.id})">
+                      ✓ Verify
+                    </button>
+                  `
+                    }
+
+                <select
+                  onchange="changeStatus(${issue.id}, this.value)"
+                >
+                  <option value="">Change Status</option>
+                  <option value="reported">Reported</option>
+                  <option value="verified">Verified</option>
+                  <option value="assigned">Assigned</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+
+                <button
+                  class="delete-btn"
+                  onclick="deleteIssue(${issue.id})">
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+        `;
+
+            }).join("");
+        }
+
+
+        async function verifyIssue(id) {
+
+            const { error } =
+                await supabaseClient
+                    .from("Issues")
+                    .update({
+                        verified: true,
+                        status: "verified"
+                    })
+                    .eq("id", id);
+
+            if (error) {
+
+                alert("Verification failed: " + error.message);
+                return;
+            }
+
+            await loadIssues();
+        }
+
+
+        async function changeStatus(id, status) {
+
+            if (!status) return;
+
+            const { error } =
+                await supabaseClient
+                    .from("Issues")
+                    .update({ status: status })
+                    .eq("id", id);
+
+            if (error) {
+
+                alert("Status update failed: " + error.message);
+                return;
+            }
+
+            await loadIssues();
+        }
+
+
+        async function deleteIssue(id) {
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to delete this issue?"
+                );
+
+            if (!confirmed) return;
+
+            const { error } =
+                await supabaseClient
+                    .from("Issues")
+                    .delete()
+                    .eq("id", id);
+
+            if (error) {
+
+                alert("Delete failed: " + error.message);
+                return;
+            }
+
+            await loadIssues();
+        }
+
+
+        $("logoutVolunteer").addEventListener(
+            "click",
+            async () => {
+
+                await supabaseClient.auth.signOut();
+
+                window.location.href = "index.html";
+            }
+        );
+
+
+        function escapeHTML(value) {
+
+            return String(value).replace(
+                /[&<>"']/g,
+                char => ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+                }[char])
+            );
+        }
+
+
+        async function start() {
+
+            const allowed = await checkVolunteer();
+
+            if (allowed) {
+                await loadIssues();
+            }
+        }
+
+        start();
+    </script>
+
+</body>
+
+</html>
