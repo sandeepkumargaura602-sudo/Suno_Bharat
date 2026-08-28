@@ -640,3 +640,180 @@ function esc(value) {
 // ===============================
 
 renderIssues();
+// ===============================
+// AUTHENTICATION
+// ===============================
+
+let isSignupMode = false;
+
+$("loginBtn").addEventListener("click", () => {
+  $("authModal").style.display = "flex";
+  $("authMessage").textContent = "";
+  $("authTitle").textContent = isSignupMode ? "Sign Up" : "Login";
+  $("authSubmit").textContent = isSignupMode ? "Sign Up" : "Login";
+});
+
+$("closeAuth").addEventListener("click", () => {
+  $("authModal").style.display = "none";
+});
+
+$("toggleAuth").addEventListener("click", () => {
+
+  isSignupMode = !isSignupMode;
+
+  $("authTitle").textContent =
+    isSignupMode ? "Sign Up" : "Login";
+
+  $("authSubmit").textContent =
+    isSignupMode ? "Sign Up" : "Login";
+
+  $("toggleAuth").textContent =
+    isSignupMode
+      ? "Already have an account? Login"
+      : "New user? Sign Up";
+
+  $("authMessage").textContent = "";
+});
+
+
+$("authSubmit").addEventListener("click", async () => {
+
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
+
+  if (!email || !password) {
+    $("authMessage").textContent =
+      "Please enter email and password.";
+    return;
+  }
+
+  $("authSubmit").disabled = true;
+  $("authMessage").textContent =
+    isSignupMode ? "Creating account..." : "Logging in...";
+
+  try {
+
+    let result;
+
+    if (isSignupMode) {
+
+      result = await supabaseClient.auth.signUp({
+        email,
+        password
+      });
+
+    } else {
+
+      result = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    }
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    if (isSignupMode && !result.data.session) {
+
+      $("authMessage").textContent =
+        "Account created. Please check your email to confirm your account.";
+
+    } else {
+
+      $("authModal").style.display = "none";
+
+      $("authEmail").value = "";
+      $("authPassword").value = "";
+
+      updateAuthUI();
+
+      $("message").textContent =
+        "✓ Login successful.";
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+    $("authMessage").textContent =
+      error.message;
+
+  } finally {
+
+    $("authSubmit").disabled = false;
+
+  }
+
+});
+
+
+// ===============================
+// LOGOUT
+// ===============================
+
+$("logoutBtn").addEventListener("click", async () => {
+
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if (error) {
+
+    console.error(error);
+
+    return;
+  }
+
+  updateAuthUI();
+
+  $("message").textContent =
+    "Logged out successfully.";
+
+});
+
+
+// ===============================
+// AUTH UI
+// ===============================
+
+async function updateAuthUI() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (user) {
+
+    $("loginBtn").style.display = "none";
+
+    $("logoutBtn").style.display = "inline-block";
+
+    $("userEmail").textContent =
+      user.email;
+
+  } else {
+
+    $("loginBtn").style.display = "inline-block";
+
+    $("logoutBtn").style.display = "none";
+
+    $("userEmail").textContent = "";
+
+  }
+
+}
+
+
+// ===============================
+// AUTH STATE LISTENER
+// ===============================
+
+supabaseClient.auth.onAuthStateChange(() => {
+  updateAuthUI();
+});
+
+
+// Check login when website opens
+updateAuthUI();
