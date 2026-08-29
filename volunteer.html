@@ -437,7 +437,7 @@ ${issue.latitude != null && issue.longitude != null
                         ? `<span class="verified">✓ VERIFIED</span>`
                         : `<span class="pending">PENDING</span>`
                     }
-              </p>S
+              </p>
               <p>
     Authority:
     <strong>${escapeHTML(issue.authority || "Not assigned")}</strong>
@@ -526,9 +526,9 @@ ${issue.latitude != null && issue.longitude != null
                 await supabaseClient
                     .from("Issues")
                     .update({
-    status: status,
-    verified: status !== "reported"
-})
+                        status: status,
+                        verified: status !== "reported"
+                    })
                     .eq("id", id);
 
             if (error) {
