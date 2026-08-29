@@ -265,7 +265,8 @@
                     .eq("user_id", currentUser.id)
                     .single();
 
-            if (error || !roleData || roleData.role !== "volunteer") {
+            if (error || !roleData ||
+                (roleData.role !== "volunteer" && roleData.role !== "admin")) {
 
                 $("volunteerMessage").textContent =
                     "Access denied. Volunteer account required.";
