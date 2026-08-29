@@ -525,7 +525,10 @@ ${issue.latitude != null && issue.longitude != null
             const { error } =
                 await supabaseClient
                     .from("Issues")
-                    .update({ status: status })
+                    .update({
+    status: status,
+    verified: status !== "reported"
+})
                     .eq("id", id);
 
             if (error) {
