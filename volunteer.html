@@ -297,6 +297,7 @@
 
                 return;
             }
+           
 
             const { data: supports, error: supportError } =
                 await supabaseClient
@@ -311,6 +312,8 @@
 
                 return;
             }
+            console.log("SUPPORTS FROM DB:", supports);
+     console.log("SUPPORT COUNT:", supports?.length);
 
             // Har issue ke supports count karo
             const supportCounts = {};
@@ -508,7 +511,7 @@ ${issue.latitude != null && issue.longitude != null
                 alert("Status update failed: " + error.message);
                 return;
             }
-
+           
             await loadIssues();
         }
 
