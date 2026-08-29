@@ -281,7 +281,6 @@
             return true;
         }
 
-
         async function loadIssues() {
 
             const { data: issues, error } =
@@ -293,16 +292,43 @@
             if (error) {
                 console.error(error);
 
-                $("volunteerMessage").textContent =
+                $("#volunteerMessage").textContent =
                     "Could not load issues: " + error.message;
 
                 return;
             }
 
-            renderStats(issues || []);
-            renderIssues(issues || []);
-        }
+            const { data: supports, error: supportError } =
+                await supabaseClient
+                    .from("issue_supports")
+                    .select("issue_id");
 
+            if (supportError) {
+                console.error("Support loading error:", supportError);
+
+                $("#volunteerMessage").textContent =
+                    "Could not load supports: " + supportError.message;
+
+                return;
+            }
+
+            // Har issue ke supports count karo
+            const supportCounts = {};
+
+            (supports || []).forEach(support => {
+                supportCounts[support.issue_id] =
+                    (supportCounts[support.issue_id] || 0) + 1;
+            });
+
+            // Har issue ke andar actual support count attach karo
+            const issuesWithSupports = (issues || []).map(issue => ({
+                ...issue,
+                supportCount: supportCounts[issue.id] || 0
+            }));
+
+            renderStats(issuesWithSupports);
+            renderIssues(issuesWithSupports);
+        }
 
         function renderStats(issues) {
 
@@ -389,7 +415,7 @@ ${issue.latitude != null && issue.longitude != null
 
               <p>
                 Supports:
-                ${issue.supporters || 0}
+                ${issue.supportCount || 0}
               </p>
 
               <p>
