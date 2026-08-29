@@ -297,7 +297,7 @@
 
                 return;
             }
-           
+
 
             const { data: supports, error: supportError } =
                 await supabaseClient
@@ -313,7 +313,7 @@
                 return;
             }
             console.log("SUPPORTS FROM DB:", supports);
-     console.log("SUPPORT COUNT:", supports?.length);
+            console.log("SUPPORT COUNT:", supports?.length);
 
             // Har issue ke supports count karo
             const supportCounts = {};
@@ -409,7 +409,9 @@ ${issue.latitude != null && issue.longitude != null
         rel="noopener noreferrer"
         class="secondary-btn"
       >
+
         📍 Navigate to Problem
+
       </a>
     `
                         : ""
@@ -417,8 +419,11 @@ ${issue.latitude != null && issue.longitude != null
               </p>
 
               <p>
+
                 Supports:
+
                 ${issue.supportCount || 0}
+
               </p>
 
               <p>
@@ -433,6 +438,23 @@ ${issue.latitude != null && issue.longitude != null
                         : `<span class="pending">PENDING</span>`
                     }
               </p>
+              <p>
+    Authority:
+    <strong>${escapeHTML(issue.authority || "Not assigned")}</strong>
+</p>
+
+<div class="authority-section">
+    <label>Assign Authority:</label>
+
+    <select onchange="assignAuthority(${issue.id}, this.value)">
+        <option value="">Select Authority</option>
+        <option value="Municipality">Municipality</option>
+        <option value="PWD">PWD</option>
+        <option value="Police">Police</option>
+        <option value="Electricity Department">Electricity Department</option>
+        <option value="Water Department">Water Department</option>
+    </select>
+</div>
 
               <div class="volunteer-actions">
 
@@ -511,10 +533,28 @@ ${issue.latitude != null && issue.longitude != null
                 alert("Status update failed: " + error.message);
                 return;
             }
-           
+
             await loadIssues();
         }
+        async function assignAuthority(id, authority) {
+            if (!authority) return;
 
+            const { error } = await supabaseClient
+                .from("Issues")
+                .update({
+                    authority: authority,
+                    status: "assigned"
+                })
+                .eq("id", id);
+
+            if (error) {
+                alert("Authority assignment failed: " + error.message);
+                console.error(error);
+                return;
+            }
+
+            await loadIssues();
+        }
 
         async function deleteIssue(id) {
 
