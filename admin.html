@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suno Bharat | Admin Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f8f5;color:#17231d}
+header{background:#fff;border-bottom:1px solid #dfe7df;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.brand{font-size:26px;font-weight:800}.brand span{font-weight:500}
+button,select,input{font:inherit}button{padding:10px 14px;border:1px solid #ccd7ce;border-radius:10px;background:#fff;font-weight:700;cursor:pointer}
+main{width:min(1200px,92%);margin:38px auto}.eyebrow{font-size:12px;letter-spacing:2px;font-weight:800;color:#3f7b5a}
+h1{font-size:48px;margin:8px 0}.sub{color:#66736b}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0}.stat,.toolbar,.issue,.empty{background:#fff;border:1px solid #dfe7df;border-radius:16px}.stat{padding:20px}.stat strong{display:block;font-size:32px}.stat span{color:#68766e}
+.toolbar{padding:14px;display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.toolbar input,.toolbar select{padding:10px;border:1px solid #ccd7ce;border-radius:9px}
+.issues{display:grid;gap:16px}.issue{padding:18px;display:grid;grid-template-columns:150px 1fr;gap:20px}.issue img{width:150px;height:130px;object-fit:cover;border-radius:12px;background:#edf1ed}
+.tag{font-size:11px;font-weight:800;letter-spacing:1px;color:#276042}.issue h3{margin:8px 0;font-size:20px}.meta{color:#68766e;font-size:14px}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mini{background:#f7f9f7;padding:10px;border-radius:9px;font-size:13px}.mini b{display:block;margin-bottom:4px}
+.actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.empty{padding:35px;text-align:center;color:#68766e}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}.issue{grid-template-columns:1fr}.issue img{width:100%;height:210px}.info{grid-template-columns:1fr 1fr}}@media(max-width:500px){h1{font-size:36px}.info{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand">Suno<span>Bharat</span></div><div><button onclick="location.href='index.html'">← Website</button> <button id="logout">Logout</button></div></header>
+<main>
+<div class="eyebrow">ADMIN PANEL</div><h1>Admin Dashboard</h1><p class="sub">Monitor civic issues, verification, support, authority routing and resolution.</p>
+<div id="msg" class="empty" style="display:none"></div>
+<section class="stats">
+<div class="stat"><strong id="total">0</strong><span>Total Reports</span></div>
+<div class="stat"><strong id="reported">0</strong><span>Reported</span></div>
+<div class="stat"><strong id="verified">0</strong><span>Verified</span></div>
+<div class="stat"><strong id="assigned">0</strong><span>Assigned</span></div>
+<div class="stat"><strong id="progress">0</strong><span>In Progress</span></div>
+<div class="stat"><strong id="resolved">0</strong><span>Resolved</span></div>
+<div class="stat"><strong id="supports">0</strong><span>Total Supports</span></div>
+<div class="stat"><strong id="amplified">0</strong><span>Amplified</span></div>
+</section>
+<div class="toolbar"><input id="search" placeholder="Search issue, location, category..."><select id="status"><option value="">All Statuses</option><option>reported</option><option>verified</option><option>assigned</option><option>in-progress</option><option>resolved</option></select><select id="category"><option value="">All Categories</option></select><button onclick="load()">↻ Refresh</button></div>
+<section id="issues" class="issues"></section>
+</main>
+<script>
+const supabaseClient=supabase.createClient("https://ejoyyrtfpkavoyujsrkv.supabase.co","sb_publishable_V4W--9Cb5MasMeCIie6TfQ_VFB9gUl2");
+let issues=[],counts={};
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+async function adminCheck(){
+ const {data:{user}}=await supabaseClient.auth.getUser();
+ if(!user){location.href="index.html";return false}
+ const {data,error}=await supabaseClient.from("user_roles").select("role").eq("user_id",user.id).maybeSingle();
+ if(error||data?.role!=="admin"){
+  document.querySelector("main").innerHTML='<div class="empty"><h2>Admin access required</h2><p>This account does not have the admin role.</p><button onclick="location.href=\'index.html\'">Back</button></div>';return false
+ } return true
+}
+async function load(){
+ const a=await supabaseClient.from("Issues").select("*").order("created_at",{ascending:false});
+ if(a.error){alert(a.error.message);return} issues=a.data||[];
+ const b=await supabaseClient.from("issue_supports").select("issue_id");
+ if(b.error){alert(b.error.message);return} counts={};(b.data||[]).forEach(x=>counts[x.issue_id]=(counts[x.issue_id]||0)+1);
+ stats();cats();render()
+}
+function stats(){
+ const c=s=>issues.filter(i=>String(i.status||"reported").toLowerCase()===s).length;
+ total.textContent=issues.length;reported.textContent=c("reported");verified.textContent=issues.filter(i=>i.verified===true).length;
+ assigned.textContent=c("assigned");progress.textContent=c("in-progress");resolved.textContent=c("resolved");
+ supports.textContent=Object.values(counts).reduce((a,b)=>a+b,0);amplified.textContent=issues.filter(i=>i.amplified===true).length
+}
+function cats(){let cs=[...new Set(issues.map(i=>i.category).filter(Boolean))].sort();category.innerHTML='<option value="">All Categories</option>'+cs.map(x=>`<option>${esc(x)}</option>`).join("")}
+function render(){
+ let q=search.value.toLowerCase(),s=status.value,c=category.value;
+ let list=issues.filter(i=>(!q||[i.description,i.location,i.category,i.authority,i.assigned_team].join(" ").toLowerCase().includes(q))&&(!s||String(i.status||"reported").toLowerCase()===s)&&(!c||i.category===c));
+ issuesEl.innerHTML=list.length?list.map(i=>`<article class="issue"><img src="${esc(i.photo_url||"")}" alt="Civic issue"><div><span class="tag">${esc(i.category||"OTHER")}</span><h3>${esc(i.description||"No description")}</h3><p class="meta">📍 ${esc(i.location||"Location unavailable")}</p><p class="meta">GPS: ${i.latitude??"N/A"}, ${i.longitude??"N/A"}</p><div class="info"><div class="mini"><b>Status</b>${esc(i.status||"reported")}</div><div class="mini"><b>Verification</b>${i.verified?"✓ VERIFIED":"PENDING"}</div><div class="mini"><b>Supports</b>${counts[i.id]||0}</div><div class="mini"><b>Authority</b>${esc(i.authority||"Not assigned")}</div><div class="mini"><b>Team</b>${esc(i.assigned_team||"Not assigned")}</div><div class="mini"><b>Amplified</b>${i.amplified?"Yes":"No"}</div></div><div class="actions"><select onchange="changeStatus(${i.id},this.value)"><option value="">Change Status</option><option>reported</option><option>verified</option><option>assigned</option><option>in-progress</option><option>resolved</option></select><button onclick="verify(${i.id})">✓ Verify</button>${i.latitude!=null&&i.longitude!=null?`<button onclick="openMap(${i.latitude},${i.longitude})">📍 Navigate</button>`:""}</div></div></article>`).join(""):'<div class="empty">No matching issues found.</div>'
+}
+const issuesEl=document.getElementById("issues");
+async function verify(id){let r=await supabaseClient.from("Issues").update({verified:true,status:"verified"}).eq("id",id);if(r.error)alert(r.error.message);else load()}
+async function changeStatus(id,s){if(!s)return;let r=await supabaseClient.from("Issues").update({status:s,verified:s!=="reported"}).eq("id",id);if(r.error)alert(r.error.message);else load()}
+function openMap(a,b){window.open(`https://www.google.com/maps/dir/?api=1&destination=${a},${b}`,"_blank")}
+search.oninput=render;status.onchange=render;category.onchange=render;
+logout.onclick=async()=>{await supabaseClient.auth.signOut();location.href="index.html"};
+(async()=>{if(await adminCheck())load()})();
+</script>
+</body></html>
