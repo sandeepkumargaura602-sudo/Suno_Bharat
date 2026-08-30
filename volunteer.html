@@ -500,24 +500,34 @@ ${issue.latitude != null && issue.longitude != null
             }).join("");
         }
 
-
         async function verifyIssue(id) {
+            console.log("VERIFY CLICKED:", id);
 
-            const { error } =
-                await supabaseClient
-                    .from("Issues")
-                    .update({
-                        verified: true,
-                        status: "verified"
-                    })
-                    .eq("id", id);
+            const { data, error } = await supabaseClient
+                .from("Issues")
+                .update({
+                    verified: true,
+                    status: "verified"
+                })
+                .eq("id", id)
+                .select();
+
+            console.log("VERIFY RESULT:", {
+                data: data,
+                error: error
+            });
 
             if (error) {
-
                 alert("Verification failed: " + error.message);
                 return;
             }
 
+            if (!data || data.length === 0) {
+                alert("Update nahi hui. Supabase RLS policy check karo.");
+                return;
+            }
+
+            alert("Issue verified successfully!");
             await loadIssues();
         }
 
