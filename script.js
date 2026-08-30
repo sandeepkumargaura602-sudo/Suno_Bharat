@@ -783,8 +783,8 @@ async function checkVolunteerAccess(user) {
   if (!volunteerBtn) return;
 
   // Default: hide button
-  volunteerBtn.style.display = "none";
-
+  // Volunteer + Admin dono ke liye button visible
+  volunteerBtn.style.display = "inline-block";
   // User login nahi hai
   if (!user) return;
 
@@ -807,7 +807,10 @@ async function checkVolunteerAccess(user) {
       return;
     }
 
-    if (data && data.role === "volunteer") {
+    if (
+      data &&
+      (data.role === "volunteer" || data.role === "admin")
+    ) {
       volunteerBtn.style.display = "inline-block";
     }
 
