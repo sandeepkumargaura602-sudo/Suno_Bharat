@@ -720,23 +720,17 @@ $("authSubmit").addEventListener("click", async () => {
     }
 
     if (isSignupMode && !result.data.session) {
-
-      $("authMessage").textContent =
+      $("#authMessage").textContent =
         "Account created. Please check your email to confirm your account.";
-
     } else {
+      $("#authModal").style.display = "none";
 
-      $("authModal").style.display = "none";
       await updateAuthUI();
 
-      $("authEmail").value = "";
-      $("authPassword").value = "";
+      $("#authEmail").value = "";
+      $("#authPassword").value = "";
 
-      updateAuthUI();
-
-      $("message").textContent =
-        "✓ Login successful.";
-
+      alert("Login successful! Welcome to SunoBharat.");
     }
 
   } catch (error) {
