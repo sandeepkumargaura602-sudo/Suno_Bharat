@@ -724,27 +724,34 @@ $("authSubmit").addEventListener("click", async () => {
         "Account created. Please check your email to confirm your account.";
     }
 
-   else {
-    const authModal = $("#authModal");
-    const authEmail = $("#authEmail");
-    const authPassword = $("#authPassword");
-  
-    if (authModal) {
-      authModal.style.display = "none";
+    else {
+      const authModal = $("#authModal");
+
+      if (authModal) {
+        authModal.style.display = "none";
+      }
+
+      const authEmail = $("#authEmail");
+      const authPassword = $("#authPassword");
+      const authMessage = $("#authMessage");
+
+      if (authEmail) {
+        authEmail.value = "";
+      }
+
+      if (authPassword) {
+        authPassword.value = "";
+      }
+
+      if (authMessage) {
+        authMessage.textContent = "";
+      }
+
+      alert("Login successful! Welcome to SunoBharat.");
+
+      await updateAuthUI();
     }
-  
-    if (authEmail) {
-      authEmail.value = "";
-    }
-  
-    if (authPassword) {
-      authPassword.value = "";
-    }
-  
-    alert("Login successful! Welcome to SunoBharat.");
-  
-    await updateAuthUI();
-   } }
+  }
   catch (error) {
 
     console.error(error);
