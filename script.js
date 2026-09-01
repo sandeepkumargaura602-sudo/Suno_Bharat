@@ -758,7 +758,7 @@ $("authSubmit").addEventListener("click", async () => {
 // LOGOUT
 // ===============================
 
-$("logoutBtn").addEventListener("click", async () => {
+$("#logoutBtn").addEventListener("click", async () => {
 
   const { error } =
     await supabaseClient.auth.signOut();
@@ -785,7 +785,7 @@ async function checkVolunteerAccess(user) {
   const volunteerBtn = document.getElementById("volunteerBtn");
   const adminBtn = document.getElementById("adminBtn");
 
-  if (!volunteerBtn) return;
+  if (!volunteerBtn || !adminBtn) return;
 
   // Default: hide button
   // Volunteer + Admin dono ke liye button visible
@@ -841,24 +841,19 @@ async function updateAuthUI() {
 
   if (user) {
 
-    $("loginBtn").style.display = "none";
-
-    $("logoutBtn").style.display = "inline-block";
-
-    $("userEmail").textContent =
-      user.email;
+    $("#loginBtn").style.display = "none";
+    $("#logoutBtn").style.display = "inline-block";
+    $("#userEmail").textContent = user.email;
+     
     await checkVolunteerAccess(user);
 
   } else {
 
-    $("loginBtn").style.display = "inline-block";
+    $("#loginBtn").style.display = "inline-block";
+    $("#logoutBtn").style.display = "none";
+    $("#userEmail").textContent = "";
 
-    $("logoutBtn").style.display = "none";
-
-    $("userEmail").textContent = "";
-
-    const volunteerBtn = $("volunteerBtn");
-
+    const volunteerBtn = $("#volunteerBtn");
     if (volunteerBtn) {
       volunteerBtn.style.display = "none";
     }
