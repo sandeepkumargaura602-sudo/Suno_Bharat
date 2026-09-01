@@ -724,7 +724,7 @@ $("authSubmit").addEventListener("click", async () => {
         "Account created. Please check your email to confirm your account.";
     }
 
-  else {
+   else {
     const authModal = $("#authModal");
     const authEmail = $("#authEmail");
     const authPassword = $("#authPassword");
@@ -744,9 +744,8 @@ $("authSubmit").addEventListener("click", async () => {
     alert("Login successful! Welcome to SunoBharat.");
   
     await updateAuthUI();
-  }
-
-  } catch (error) {
+   } }
+  catch (error) {
 
     console.error(error);
 
