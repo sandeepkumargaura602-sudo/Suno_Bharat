@@ -727,14 +727,19 @@ $("authSubmit").addEventListener("click", async () => {
     else {
       const authModal = $("#authModal");
 
-      if (authModal) {
-        authModal.style.display = "none";
-      }
-
       const authEmail = $("#authEmail");
       const authPassword = $("#authPassword");
       const authMessage = $("#authMessage");
 
+      // Login successful popup
+      alert("Login successful! Welcome to SunoBharat.");
+
+      // User OK dabane ke BAAD modal close hoga
+      if (authModal) {
+        authModal.style.display = "none";
+      }
+
+      // Fields clear
       if (authEmail) {
         authEmail.value = "";
       }
@@ -746,8 +751,6 @@ $("authSubmit").addEventListener("click", async () => {
       if (authMessage) {
         authMessage.textContent = "";
       }
-
-      alert("Login successful! Welcome to SunoBharat.");
     }
   }
   catch (error) {
