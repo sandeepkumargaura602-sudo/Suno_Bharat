@@ -856,8 +856,8 @@ async function updateAuthUI() {
     const volunteerBtn = $("volunteerBtn");
 
     if (volunteerBtn) {
-      volunteerBtn.style.display = "inline-block";
-    }
+      volunteerBtn.style.display = "none";
+  }
 
   }
 
