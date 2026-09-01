@@ -783,12 +783,14 @@ $("logoutBtn").addEventListener("click", async () => {
 async function checkVolunteerAccess(user) {
 
   const volunteerBtn = document.getElementById("volunteerBtn");
+  const adminBtn = document.getElementById("adminBtn");
 
   if (!volunteerBtn) return;
 
   // Default: hide button
   // Volunteer + Admin dono ke liye button visible
-  volunteerBtn.style.display = "inline-block";
+  volunteerBtn.style.display = "none";
+  adminBtn.style.display = "none";
   // User login nahi hai
   if (!user) return;
 
@@ -811,11 +813,13 @@ async function checkVolunteerAccess(user) {
       return;
     }
 
-    if (
-      data &&
-      (data.role === "volunteer" || data.role === "admin")
-    ) {
+    if (data?.role === "volunteer") {
       volunteerBtn.style.display = "inline-block";
+    }
+
+    if (data?.role === "admin") {
+      volunteerBtn.style.display = "inline-block";
+      adminBtn.style.display = "inline-block";
     }
 
   } catch (err) {
@@ -857,7 +861,7 @@ async function updateAuthUI() {
 
     if (volunteerBtn) {
       volunteerBtn.style.display = "none";
-  }
+    }
 
   }
 
