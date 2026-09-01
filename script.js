@@ -727,6 +727,7 @@ $("authSubmit").addEventListener("click", async () => {
     } else {
 
       $("authModal").style.display = "none";
+      await updateAuthUI();
 
       $("authEmail").value = "";
       $("authPassword").value = "";
