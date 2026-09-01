@@ -758,24 +758,25 @@ $("authSubmit").addEventListener("click", async () => {
 // LOGOUT
 // ===============================
 
-$("#logoutBtn").addEventListener("click", async () => {
+const logoutBtn = $("#logoutBtn");
 
-  const { error } =
-    await supabaseClient.auth.signOut();
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
 
-  if (error) {
+    const { error } = await supabaseClient.auth.signOut();
 
-    console.error(error);
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-    return;
-  }
+    updateAuthUI();
 
-  updateAuthUI();
+    $("#message").textContent = "Logged out successfully.";
+  });
+}
 
-  $("message").textContent =
-    "Logged out successfully.";
 
-});
 // ===============================
 // VOLUNTEER ACCESS
 // ===============================
@@ -844,7 +845,7 @@ async function updateAuthUI() {
     $("#loginBtn").style.display = "none";
     $("#logoutBtn").style.display = "inline-block";
     $("#userEmail").textContent = user.email;
-     
+
     await checkVolunteerAccess(user);
 
   } else {
