@@ -840,27 +840,51 @@ async function updateAuthUI() {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
+  const loginBtn = $("#loginBtn");
+  const logoutBtn = $("#logoutBtn");
+  const userEmail = $("#userEmail");
+
   if (user) {
 
-    $("#loginBtn").style.display = "none";
-    $("#logoutBtn").style.display = "inline-block";
-    $("#userEmail").textContent = user.email;
+    if (loginBtn) {
+      loginBtn.style.display = "none";
+    }
+
+    if (logoutBtn) {
+      logoutBtn.style.display = "inline-block";
+    }
+
+    if (userEmail) {
+      userEmail.textContent = user.email;
+    }
 
     await checkVolunteerAccess(user);
 
   } else {
 
-    $("#loginBtn").style.display = "inline-block";
-    $("#logoutBtn").style.display = "none";
-    $("#userEmail").textContent = "";
+    if (loginBtn) {
+      loginBtn.style.display = "inline-block";
+    }
+
+    if (logoutBtn) {
+      logoutBtn.style.display = "none";
+    }
+
+    if (userEmail) {
+      userEmail.textContent = "";
+    }
 
     const volunteerBtn = $("#volunteerBtn");
+    const adminBtn = $("#adminBtn");
+
     if (volunteerBtn) {
       volunteerBtn.style.display = "none";
     }
 
+    if (adminBtn) {
+      adminBtn.style.display = "none";
+    }
   }
-
 }
 
 
