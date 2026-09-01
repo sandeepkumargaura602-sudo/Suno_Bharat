@@ -699,7 +699,11 @@ $("authSubmit").addEventListener("click", async () => {
 
       result = await supabaseClient.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo:
+            "https://sandeepkumargaura602-sudo.github.io/Suno_Bharat/"
+        }
       });
 
     } else {
