@@ -758,22 +758,28 @@ $("authSubmit").addEventListener("click", async () => {
 // ===============================
 // LOGOUT
 // ===============================
-
 const logoutBtn = $("#logoutBtn");
 
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
 
+    console.log("Logout button clicked");
+
     const { error } = await supabaseClient.auth.signOut();
 
     if (error) {
-      console.error(error);
+      console.error("Logout error:", error);
       return;
     }
 
-    updateAuthUI();
+    console.log("Logout successful");
 
-    $("#message").textContent = "Logged out successfully.";
+    await updateAuthUI();
+
+    const message = $("#message");
+    if (message) {
+      message.textContent = "Logged out successfully.";
+    }
   });
 }
 
@@ -893,10 +899,15 @@ async function updateAuthUI() {
 // AUTH STATE LISTENER
 // ===============================
 
-supabaseClient.auth.onAuthStateChange(() => {
-  updateAuthUI();
-});
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  console.log("Auth state:", event, session);
 
+  if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+    setTimeout(() => {
+      updateAuthUI();
+    }, 0);
+  }
+});
 
 // Check login when website opens
 updateAuthUI();
