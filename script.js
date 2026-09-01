@@ -723,15 +723,19 @@ $("authSubmit").addEventListener("click", async () => {
       $("#authMessage").textContent =
         "Account created. Please check your email to confirm your account.";
     }
+
     else {
-      $("#authModal").style.display = "none";
+      const authModal = $("#authModal");
 
-
+      if (authModal) {
+        authModal.style.display = "none";
+      }
 
       $("#authEmail").value = "";
       $("#authPassword").value = "";
 
       alert("Login successful! Welcome to SunoBharat.");
+
       await updateAuthUI();
     }
 
