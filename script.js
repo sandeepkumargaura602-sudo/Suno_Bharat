@@ -748,8 +748,6 @@ $("authSubmit").addEventListener("click", async () => {
       }
 
       alert("Login successful! Welcome to SunoBharat.");
-
-      await updateAuthUI();
     }
   }
   catch (error) {
