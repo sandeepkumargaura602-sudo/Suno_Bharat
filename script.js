@@ -1028,12 +1028,7 @@ if (logoutBtn) {
           "none";
       }
 
-      const message = $("message");
 
-      if (message) {
-        message.textContent =
-          "Logged out successfully.";
-      }
 
     }
   );
