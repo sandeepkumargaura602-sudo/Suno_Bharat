@@ -747,7 +747,7 @@ $("authSubmit").addEventListener("click", async () => {
         authMessage.textContent = "";
       }
 
-      await updateAuthUI();
+      updateAuthUI();
     }
   }
   catch (error) {
@@ -854,47 +854,53 @@ async function checkVolunteerAccess(user) {
 
 async function updateAuthUI() {
 
-  const {
-    data: { user }
-  } = await supabaseClient.auth.getUser();
+  const { data: { user } } =
+    await supabaseClient.auth.getUser();
 
   const loginBtn = $("#loginBtn");
   const logoutBtn = $("#logoutBtn");
   const userEmail = $("#userEmail");
+  const volunteerBtn = $("#volunteerBtn");
+  const adminBtn = $("#adminBtn");
 
   if (user) {
 
+    // Login button hide
     if (loginBtn) {
       loginBtn.style.display = "none";
     }
 
+    // Logout button show
     if (logoutBtn) {
       logoutBtn.style.display = "inline-block";
     }
 
+    // Email show
     if (userEmail) {
       userEmail.textContent = user.email;
     }
 
+    // Role buttons check
     await checkVolunteerAccess(user);
 
   } else {
 
+    // Login button show
     if (loginBtn) {
       loginBtn.style.display = "inline-block";
     }
 
+    // Logout button hide
     if (logoutBtn) {
       logoutBtn.style.display = "none";
     }
 
+    // Email clear
     if (userEmail) {
       userEmail.textContent = "";
     }
 
-    const volunteerBtn = $("#volunteerBtn");
-    const adminBtn = $("#adminBtn");
-
+    // Dashboard buttons hide
     if (volunteerBtn) {
       volunteerBtn.style.display = "none";
     }
@@ -904,8 +910,6 @@ async function updateAuthUI() {
     }
   }
 }
-
-
 // ===============================
 // AUTH STATE LISTENER
 // ===============================
