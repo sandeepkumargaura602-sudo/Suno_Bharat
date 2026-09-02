@@ -646,283 +646,661 @@ renderIssues();
 
 let isSignupMode = false;
 
-$("loginBtn").addEventListener("click", () => {
-  $("authModal").style.display = "flex";
-  $("authMessage").textContent = "";
-  $("authTitle").textContent = isSignupMode ? "Sign Up" : "Login";
-  $("authSubmit").textContent = isSignupMode ? "Sign Up" : "Login";
-});
 
-$("closeAuth").addEventListener("click", () => {
-  $("authModal").style.display = "none";
-});
+// ===============================
+// OPEN LOGIN MODAL
+// ===============================
 
-$("toggleAuth").addEventListener("click", () => {
+const loginBtn = $("loginBtn");
 
-  isSignupMode = !isSignupMode;
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
 
-  $("authTitle").textContent =
-    isSignupMode ? "Sign Up" : "Login";
+    const authModal = $("authModal");
+    const authMessage = $("authMessage");
+    const authTitle = $("authTitle");
+    const authSubmit = $("authSubmit");
 
-  $("authSubmit").textContent =
-    isSignupMode ? "Sign Up" : "Login";
+    if (authModal) {
+      authModal.style.display = "flex";
+    }
 
-  $("toggleAuth").textContent =
-    isSignupMode
-      ? "Already have an account? Login"
-      : "New user? Sign Up";
+    if (authMessage) {
+      authMessage.textContent = "";
+    }
 
-  $("authMessage").textContent = "";
-});
+    if (authTitle) {
+      authTitle.textContent =
+        isSignupMode ? "Sign Up" : "Login";
+    }
+
+    if (authSubmit) {
+      authSubmit.textContent =
+        isSignupMode ? "Sign Up" : "Login";
+    }
+
+  });
+}
 
 
-$("authSubmit").addEventListener("click", async () => {
+// ===============================
+// CLOSE LOGIN MODAL
+// ===============================
 
-  const email = $("authEmail").value.trim();
-  const password = $("authPassword").value;
+const closeAuth = $("closeAuth");
 
-  if (!email || !password) {
-    $("authMessage").textContent =
-      "Please enter email and password.";
-    return;
-  }
+if (closeAuth) {
 
-  $("authSubmit").disabled = true;
-  $("authMessage").textContent =
-    isSignupMode ? "Creating account..." : "Logging in...";
+  closeAuth.addEventListener("click", () => {
 
-  try {
+    const authModal = $("authModal");
 
-    let result;
+    if (authModal) {
+      authModal.style.display = "none";
+    }
 
-    if (isSignupMode) {
+  });
 
-      result = await supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo:
-            "https://sandeepkumargaura602-sudo.github.io/Suno_Bharat/"
+}
+
+
+// ===============================
+// LOGIN / SIGNUP TOGGLE
+// ===============================
+
+const toggleAuth = $("toggleAuth");
+
+if (toggleAuth) {
+
+  toggleAuth.addEventListener("click", () => {
+
+    isSignupMode = !isSignupMode;
+
+    const authTitle = $("authTitle");
+    const authSubmit = $("authSubmit");
+    const authMessage = $("authMessage");
+
+    if (authTitle) {
+      authTitle.textContent =
+        isSignupMode ? "Sign Up" : "Login";
+    }
+
+    if (authSubmit) {
+      authSubmit.textContent =
+        isSignupMode ? "Sign Up" : "Login";
+    }
+
+    if (toggleAuth) {
+      toggleAuth.textContent =
+        isSignupMode
+          ? "Already have an account? Login"
+          : "New user? Sign Up";
+    }
+
+    if (authMessage) {
+      authMessage.textContent = "";
+    }
+
+  });
+
+}
+
+
+// ===============================
+// LOGIN / SIGNUP SUBMIT
+// ===============================
+
+const authSubmit = $("authSubmit");
+
+if (authSubmit) {
+
+  authSubmit.addEventListener("click", async () => {
+
+    const emailInput = $("authEmail");
+    const passwordInput = $("authPassword");
+    const authMessage = $("authMessage");
+
+    const email =
+      emailInput ? emailInput.value.trim() : "";
+
+    const password =
+      passwordInput ? passwordInput.value : "";
+
+
+    // -------------------------------
+    // VALIDATION
+    // -------------------------------
+
+    if (!email || !password) {
+
+      if (authMessage) {
+        authMessage.textContent =
+          "Please enter email and password.";
+      }
+
+      return;
+    }
+
+
+    authSubmit.disabled = true;
+
+    if (authMessage) {
+      authMessage.textContent =
+        isSignupMode
+          ? "Creating account..."
+          : "Logging in...";
+    }
+
+
+    try {
+
+      let result;
+
+
+      // -------------------------------
+      // SIGN UP
+      // -------------------------------
+
+      if (isSignupMode) {
+
+        result =
+          await supabaseClient.auth.signUp({
+
+            email: email,
+
+            password: password,
+
+            options: {
+
+              emailRedirectTo:
+                "https://sandeepkumargaura602-sudo.github.io/Suno_Bharat/"
+
+            }
+
+          });
+
+      }
+
+
+      // -------------------------------
+      // LOGIN
+      // -------------------------------
+
+      else {
+
+        result =
+          await supabaseClient.auth.signInWithPassword({
+
+            email: email,
+
+            password: password
+
+          });
+
+      }
+
+
+      // -------------------------------
+      // ERROR CHECK
+      // -------------------------------
+
+      if (result.error) {
+        throw result.error;
+      }
+
+
+      // ===============================
+      // SIGNUP SUCCESS
+      // ===============================
+
+      if (
+        isSignupMode &&
+        !result.data.session
+      ) {
+
+        if (authMessage) {
+
+          authMessage.textContent =
+            "Account created successfully. Please check your email and confirm your account.";
+
         }
-      });
 
-    } else {
+        return;
+      }
 
-      result = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
 
-    }
+      // ===============================
+      // LOGIN SUCCESS
+      // ===============================
 
-    if (result.error) {
-      throw result.error;
-    }
-
-    if (isSignupMode && !result.data.session) {
-      $("#authMessage").textContent =
-        "Account created. Please check your email to confirm your account.";
-    }
-
-    else {
-      const authModal = $("#authModal");
+      const authModal = $("authModal");
 
       if (authModal) {
         authModal.style.display = "none";
       }
 
-      const authEmail = $("#authEmail");
-      const authPassword = $("#authPassword");
-      const authMessage = $("#authMessage");
 
-      if (authEmail) {
-        authEmail.value = "";
+      // Clear fields
+
+      if (emailInput) {
+        emailInput.value = "";
       }
 
-      if (authPassword) {
-        authPassword.value = "";
+      if (passwordInput) {
+        passwordInput.value = "";
       }
 
       if (authMessage) {
         authMessage.textContent = "";
       }
 
-      updateAuthUI();
+
+      // Immediately update UI
+
+      const loginButton = $("loginBtn");
+      const logoutButton = $("logoutBtn");
+      const userEmail = $("userEmail");
+
+      if (loginButton) {
+        loginButton.style.display = "none";
+      }
+
+      if (logoutButton) {
+        logoutButton.style.display = "inline-block";
+      }
+
+      if (userEmail) {
+        userEmail.textContent = email;
+      }
+
+
+      // Update role buttons in background
+
+      const {
+        data: {
+          user
+        }
+      } =
+        await supabaseClient.auth.getUser();
+
+      if (user) {
+        checkVolunteerAccess(user);
+      }
+
     }
-  }
-  catch (error) {
 
-    console.error(error);
+    catch (error) {
 
-    $("authMessage").textContent =
-      error.message;
+      console.error(
+        "Authentication error:",
+        error
+      );
 
-  } finally {
+      if (authMessage) {
+        authMessage.textContent =
+          error.message;
+      }
 
-    $("authSubmit").disabled = false;
+    }
 
-  }
+    finally {
 
-});
+      authSubmit.disabled = false;
+
+    }
+
+  });
+
+}
 
 
 // ===============================
 // LOGOUT
 // ===============================
-const logoutBtn = $("#logoutBtn");
+
+const logoutBtn = $("logoutBtn");
 
 if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
 
-    console.log("Logout button clicked");
+  logoutBtn.addEventListener(
+    "click",
+    async () => {
 
-    const { error } = await supabaseClient.auth.signOut();
+      console.log(
+        "Logout button clicked"
+      );
 
-    if (error) {
-      console.error("Logout error:", error);
-      return;
+
+      const {
+        error
+      } =
+        await supabaseClient.auth.signOut();
+
+
+      if (error) {
+
+        console.error(
+          "Logout error:",
+          error
+        );
+
+        return;
+      }
+
+
+      console.log(
+        "Logout successful"
+      );
+
+
+      // Immediately update UI
+
+      if (logoutBtn) {
+        logoutBtn.style.display = "none";
+      }
+
+      const loginButton = $("loginBtn");
+
+      if (loginButton) {
+        loginButton.style.display =
+          "inline-block";
+      }
+
+      const userEmail = $("userEmail");
+
+      if (userEmail) {
+        userEmail.textContent = "";
+      }
+
+      const volunteerBtn =
+        $("volunteerBtn");
+
+      const adminBtn =
+        $("adminBtn");
+
+      if (volunteerBtn) {
+        volunteerBtn.style.display =
+          "none";
+      }
+
+      if (adminBtn) {
+        adminBtn.style.display =
+          "none";
+      }
+
+      const message = $("message");
+
+      if (message) {
+        message.textContent =
+          "Logged out successfully.";
+      }
+
     }
+  );
 
-    console.log("Logout successful");
-
-    await updateAuthUI();
-
-    const message = $("#message");
-    if (message) {
-      message.textContent = "Logged out successfully.";
-    }
-  });
 }
 
 
 // ===============================
-// VOLUNTEER ACCESS
+// VOLUNTEER / ADMIN ACCESS
 // ===============================
 
 async function checkVolunteerAccess(user) {
 
-  const volunteerBtn = document.getElementById("volunteerBtn");
-  const adminBtn = document.getElementById("adminBtn");
+  const volunteerBtn =
+    $("volunteerBtn");
 
-  if (!volunteerBtn || !adminBtn) return;
+  const adminBtn =
+    $("adminBtn");
 
-  // Default: hide button
-  // Volunteer + Admin dono ke liye button visible
-  volunteerBtn.style.display = "none";
-  adminBtn.style.display = "none";
-  // User login nahi hai
-  if (!user) return;
+
+  if (!user) {
+
+    if (volunteerBtn) {
+      volunteerBtn.style.display =
+        "none";
+    }
+
+    if (adminBtn) {
+      adminBtn.style.display =
+        "none";
+    }
+
+    return;
+  }
+
+
+  // Default hide
+
+  if (volunteerBtn) {
+    volunteerBtn.style.display =
+      "none";
+  }
+
+  if (adminBtn) {
+    adminBtn.style.display =
+      "none";
+  }
+
 
   try {
 
-    const { data, error } = await supabaseClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-    console.log("Volunteer role check:", {
-      userId: user.id,
-      data: data,
-      error: error
-    });
+
+    console.log(
+      "Volunteer role check:",
+      {
+        userId: user.id,
+        data: data,
+        error: error
+      }
+    );
+
 
     if (error) {
-      console.error("Role check error:", error);
+
+      console.error(
+        "Role check error:",
+        error
+      );
+
       return;
     }
 
-    if (data?.role === "volunteer") {
-      volunteerBtn.style.display = "inline-block";
+
+    // Volunteer
+
+    if (
+      data?.role === "volunteer"
+    ) {
+
+      if (volunteerBtn) {
+        volunteerBtn.style.display =
+          "inline-block";
+      }
+
     }
 
-    if (data?.role === "admin") {
-      volunteerBtn.style.display = "inline-block";
-      adminBtn.style.display = "inline-block";
+
+    // Admin
+
+    if (
+      data?.role === "admin"
+    ) {
+
+      if (volunteerBtn) {
+        volunteerBtn.style.display =
+          "inline-block";
+      }
+
+      if (adminBtn) {
+        adminBtn.style.display =
+          "inline-block";
+      }
+
     }
-
-  } catch (err) {
-
-    console.error("Volunteer access error:", err);
 
   }
+
+  catch (error) {
+
+    console.error(
+      "Volunteer access error:",
+      error
+    );
+
+  }
+
 }
 
+
 // ===============================
-// AUTH UI
+// UPDATE AUTH UI
 // ===============================
 
 async function updateAuthUI() {
 
-  const { data: { user } } =
-    await supabaseClient.auth.getUser();
+  try {
 
-  const loginBtn = $("#loginBtn");
-  const logoutBtn = $("#logoutBtn");
-  const userEmail = $("#userEmail");
-  const volunteerBtn = $("#volunteerBtn");
-  const adminBtn = $("#adminBtn");
+    const {
+      data: {
+        user
+      }
+    } =
+      await supabaseClient.auth.getUser();
 
-  if (user) {
 
-    // Login button hide
-    if (loginBtn) {
-      loginBtn.style.display = "none";
+    const loginButton =
+      $("loginBtn");
+
+    const logoutButton =
+      $("logoutBtn");
+
+    const userEmail =
+      $("userEmail");
+
+    const volunteerBtn =
+      $("volunteerBtn");
+
+    const adminBtn =
+      $("adminBtn");
+
+
+    // ===============================
+    // USER LOGGED IN
+    // ===============================
+
+    if (user) {
+
+      if (loginButton) {
+        loginButton.style.display =
+          "none";
+      }
+
+      if (logoutButton) {
+        logoutButton.style.display =
+          "inline-block";
+      }
+
+      if (userEmail) {
+        userEmail.textContent =
+          user.email;
+      }
+
+
+      // Do NOT wait for role query
+
+      checkVolunteerAccess(user);
+
     }
 
-    // Logout button show
-    if (logoutBtn) {
-      logoutBtn.style.display = "inline-block";
+
+    // ===============================
+    // USER LOGGED OUT
+    // ===============================
+
+    else {
+
+      if (loginButton) {
+        loginButton.style.display =
+          "inline-block";
+      }
+
+      if (logoutButton) {
+        logoutButton.style.display =
+          "none";
+      }
+
+      if (userEmail) {
+        userEmail.textContent = "";
+      }
+
+      if (volunteerBtn) {
+        volunteerBtn.style.display =
+          "none";
+      }
+
+      if (adminBtn) {
+        adminBtn.style.display =
+          "none";
+      }
+
     }
 
-    // Email show
-    if (userEmail) {
-      userEmail.textContent = user.email;
-    }
-
-    // Role buttons check
-    await checkVolunteerAccess(user);
-
-  } else {
-
-    // Login button show
-    if (loginBtn) {
-      loginBtn.style.display = "inline-block";
-    }
-
-    // Logout button hide
-    if (logoutBtn) {
-      logoutBtn.style.display = "none";
-    }
-
-    // Email clear
-    if (userEmail) {
-      userEmail.textContent = "";
-    }
-
-    // Dashboard buttons hide
-    if (volunteerBtn) {
-      volunteerBtn.style.display = "none";
-    }
-
-    if (adminBtn) {
-      adminBtn.style.display = "none";
-    }
   }
+
+  catch (error) {
+
+    console.error(
+      "Auth UI error:",
+      error
+    );
+
+  }
+
 }
+
+
 // ===============================
 // AUTH STATE LISTENER
 // ===============================
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  console.log("Auth state:", event, session);
+supabaseClient.auth.onAuthStateChange(
+  (event, session) => {
 
-  if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-    setTimeout(() => {
-      updateAuthUI();
-    }, 0);
+    console.log(
+      "Auth state:",
+      event,
+      session
+    );
+
+
+    if (
+      event === "SIGNED_IN" ||
+      event === "SIGNED_OUT"
+    ) {
+
+      setTimeout(() => {
+        updateAuthUI();
+      }, 0);
+
+    }
+
   }
-});
+);
 
-// Check login when website opens
+
+// ===============================
+// CHECK LOGIN ON PAGE LOAD
+// ===============================
+
 updateAuthUI();
