@@ -750,208 +750,135 @@ if (toggleAuth) {
 // LOGIN / SIGNUP SUBMIT
 // ===============================
 
-const authSubmit = $("authSubmit");
+function friendlyAuthError(error) {
+  const msg = (error && error.message ? error.message : "").toLowerCase();
 
-if (authSubmit) {
+  if (msg.includes("invalid login credentials"))
+    return "Wrong email or password. If you are new, click 'Sign Up' first.";
+  if (msg.includes("email not confirmed"))
+    return "Email not confirmed. Please open the confirmation mail we sent and click the link.";
+  if (msg.includes("already registered") || msg.includes("already been registered"))
+    return "This email is already registered. Please login instead.";
+  if (msg.includes("rate limit"))
+    return "Too many emails sent. Please wait a few minutes and try again.";
+  if (msg.includes("password") && msg.includes("characters"))
+    return "Password must be at least 6 characters.";
+  if (msg.includes("valid email") || msg.includes("invalid email"))
+    return "Please enter a valid email address.";
+  if (msg.includes("failed to fetch") || msg.includes("network"))
+    return "Network problem. Check your internet connection and try again.";
 
-  authSubmit.addEventListener("click", async () => {
+  return (error && error.message) || "Something went wrong. Please try again.";
+}
 
-    const emailInput = $("authEmail");
-    const passwordInput = $("authPassword");
-    const authMessage = $("authMessage");
+async function handleAuthSubmit() {
 
-    const email =
-      emailInput ? emailInput.value.trim() : "";
+  const authSubmit = $("authSubmit");
+  const emailInput = $("authEmail");
+  const passwordInput = $("authPassword");
+  const authMessage = $("authMessage");
 
-    const password =
-      passwordInput ? passwordInput.value : "";
+  const setMsg = (text) => {
+    if (authMessage) authMessage.textContent = text;
+  };
 
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passwordInput ? passwordInput.value : "";
 
-    // -------------------------------
-    // VALIDATION
-    // -------------------------------
+  if (!email || !password) {
+    setMsg("Please enter email and password.");
+    return;
+  }
 
-    if (!email || !password) {
+  if (isSignupMode && password.length < 6) {
+    setMsg("Password must be at least 6 characters.");
+    return;
+  }
 
-      if (authMessage) {
-        authMessage.textContent =
-          "Please enter email and password.";
-      }
+  authSubmit.disabled = true;
+  setMsg(isSignupMode ? "Creating account..." : "Logging in...");
 
-      return;
-    }
+  try {
 
+    // ---------- SIGN UP ----------
+    if (isSignupMode) {
 
-    authSubmit.disabled = true;
-
-    if (authMessage) {
-      authMessage.textContent =
-        isSignupMode
-          ? "Creating account..."
-          : "Logging in...";
-    }
-
-
-    try {
-
-      let result;
-
-
-      // -------------------------------
-      // SIGN UP
-      // -------------------------------
-
-      if (isSignupMode) {
-
-        result =
-          await supabaseClient.auth.signUp({
-
-            email: email,
-
-            password: password,
-
-            options: {
-
-              emailRedirectTo:
-                "https://sandeepkumargaura602-sudo.github.io/Suno_Bharat/"
-
-            }
-
-          });
-
-      }
-
-
-      // -------------------------------
-      // LOGIN
-      // -------------------------------
-
-      else {
-
-        result =
-          await supabaseClient.auth.signInWithPassword({
-
-            email: email,
-
-            password: password
-
-          });
-
-      }
-
-
-      // -------------------------------
-      // ERROR CHECK
-      // -------------------------------
-
-      if (result.error) {
-        throw result.error;
-      }
-
-
-      // ===============================
-      // SIGNUP SUCCESS
-      // ===============================
-
-      if (
-        isSignupMode &&
-        !result.data.session
-      ) {
-
-        if (authMessage) {
-
-          authMessage.textContent =
-            "Account created successfully. Please check your email and confirm your account.";
-
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + window.location.pathname
         }
+      });
 
+      if (error) throw error;
+
+      // Supabase returns a user with empty identities if email already exists
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setMsg("This email is already registered. Please login instead.");
         return;
       }
 
-
-      // ===============================
-      // LOGIN SUCCESS
-      // ===============================
-
-      const authModal = $("authModal");
-
-      if (authModal) {
-        authModal.style.display = "none";
-      }
-
-
-      // Clear fields
-
-      if (emailInput) {
-        emailInput.value = "";
-      }
-
-      if (passwordInput) {
-        passwordInput.value = "";
-      }
-
-      if (authMessage) {
-        authMessage.textContent = "";
-      }
-
-
-      // Immediately update UI
-
-      const loginButton = $("loginBtn");
-      const logoutButton = $("logoutBtn");
-      const userEmail = $("userEmail");
-
-      if (loginButton) {
-        loginButton.style.display = "none";
-      }
-
-      if (logoutButton) {
-        logoutButton.style.display = "inline-block";
-      }
-
-      if (userEmail) {
-        userEmail.textContent = email;
-      }
-
-
-      // Update role buttons in background
-
-      const {
-        data: {
-          user
-        }
-      } =
-        await supabaseClient.auth.getUser();
-
-      if (user) {
-        checkVolunteerAccess(user);
+      // Email confirmation ON -> no session yet
+      if (!data.session) {
+        setMsg("Account created! Please check your email (also Spam folder) and click the confirmation link, then login.");
+        return;
       }
 
     }
 
-    catch (error) {
+    // ---------- LOGIN ----------
+    else {
 
-      console.error(
-        "Authentication error:",
-        error
-      );
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
-      if (authMessage) {
-        authMessage.textContent =
-          error.message;
-      }
-
+      if (error) throw error;
     }
 
-    finally {
+    // ---------- SUCCESS ----------
+    const authModal = $("authModal");
+    if (authModal) authModal.style.display = "none";
 
-      authSubmit.disabled = false;
+    if (emailInput) emailInput.value = "";
+    if (passwordInput) passwordInput.value = "";
+    setMsg("");
 
-    }
+    // Refresh header buttons (login/logout/volunteer/admin)
+    await updateAuthUI();
 
-  });
+  }
 
+  catch (error) {
+    console.error("Authentication error:", error);
+    setMsg(friendlyAuthError(error));
+  }
+
+  finally {
+    authSubmit.disabled = false;
+  }
 }
+
+const authSubmitBtn = $("authSubmit");
+
+if (authSubmitBtn) {
+  authSubmitBtn.addEventListener("click", handleAuthSubmit);
+}
+
+// Press Enter inside email/password to submit
+["authEmail", "authPassword"].forEach((id) => {
+  const el = $(id);
+  if (el) {
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleAuthSubmit();
+      }
+    });
+  }
+});
 
 
 // ===============================
